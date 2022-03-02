@@ -42,14 +42,24 @@ export function RegisterLoginData() {
   });
 
   async function handleRegister(formData: FormData) {
-    const newLoginData = {
-      id: String(uuid.v4()),
-      ...formData
+
+    try {
+      const newLoginData = {
+        id: String(uuid.v4()),
+        ...formData
+      }
+
+      const dataKey = '@savepass:logins';
+      const logins = await AsyncStorage.getItem(dataKey);
+      const loginsFormated = logins ? JSON.parse(logins) : [];
+
+      loginsFormated.push(newLoginData)
+      await AsyncStorage.setItem(dataKey, JSON.stringify(loginsFormated));
+
+      navigate('Home');
+    } catch (error) {
+      console.log(error);
     }
-
-    const dataKey = '@savepass:logins';
-
-    // Save data on AsyncStorage and navigate to 'Home' screen
   }
 
   return (
@@ -61,13 +71,13 @@ export function RegisterLoginData() {
       <Header />
       <Container>
         <Form>
+
           <Input
             testID="service-name-input"
             title="Nome do serviço"
             name="service_name"
             error={
-              // Replace here with real content
-              'Has error ? show error message'
+              errors?.service_name && errors?.service_name?.message
             }
             control={control}
             autoCapitalize="sentences"
@@ -78,8 +88,7 @@ export function RegisterLoginData() {
             title="E-mail"
             name="email"
             error={
-              // Replace here with real content
-              'Has error ? show error message'
+              errors?.email && errors?.email?.message
             }
             control={control}
             autoCorrect={false}
@@ -91,8 +100,7 @@ export function RegisterLoginData() {
             title="Senha"
             name="password"
             error={
-              // Replace here with real content
-              'Has error ? show error message'
+              errors?.password && errors?.password?.message
             }
             control={control}
             secureTextEntry
